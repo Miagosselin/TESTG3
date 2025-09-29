@@ -1,0 +1,788 @@
+-- KingGen Key System - FINAL AUTOLOAD version
+-- Auteur: ChatGPT
+-- Premier run: GUI direct
+-- AprÃ¨s teleport: attend 15s, puis relance le GUI via readfile
+
+local queueteleport = syn and syn.queue_on_teleport or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
+local folderName = "KingGen"
+local scriptFileName = folderName .. "/keyhub_autoload.txt"
+
+-- Script complet
+local fullScript = [[
+local queueteleport = syn and syn.queue_on_teleport or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
+
+-- [Fonctions et Variables Globales]
+local function addShadow(parent)
+    local shadow = Instance.new("ImageLabel", parent)
+    shadow.Name = "Shadow"
+    shadow.Image = "rbxassetid://1316045217"
+    shadow.Size = UDim2.new(1, 12, 1, 12)
+    shadow.Position = UDim2.new(0, -6, 0, -6)
+    shadow.BackgroundTransparency = 1
+    shadow.ImageTransparency = 0.7
+    shadow.ZIndex = parent.ZIndex - 1
+    return shadow
+end
+
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local Player = Players.LocalPlayer
+local UserId = Player.UserId
+local PlaceId = game.PlaceId
+
+local folderName = "KingGen"
+local keyFileName = folderName .. "/key.json"
+
+local config = {
+    FreeKey = "CLONEFIX",
+    PermKeys = {
+        {key = "PERxxxM1", used = false, userid = nil},
+        {key = "PExxxRM2", used = false, userid = nil},
+        {key = "PERwwM3", used = false, userid = nil},
+        {key = "PEsssRM4", used = false, userid = nil},
+        {key = "PExxRM5", used = false, userid = nil},
+    },
+    SuperPermKey = "SUPERxxPERM",
+    Saved = {}
+}
+
+local function fetchScript(url)
+    local success, result = pcall(function()
+        return game:HttpGet(url, true)
+    end)
+    if success and result and result ~= "" then
+        return result
+    else
+        return nil
+    end
+end
+
+local gameScripts = {
+    [16656664443] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+    [15666650878] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+    [79243087103999] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+    [4543855070] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+    [76944637102068] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+    [12997619803] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+    [118396261129211] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+    [94282122066477] = fetchScript("https://pastebin.com/raw/x8JTfbKZ"),
+    [18642553859] = fetchScript("https://pastebin.com/raw/99cDESLz")
+}
+-- [Fin des Fonctions et Variables Globales]
+
+-- [DÃ©but de la Fonction Principale FusionnÃ©e]
+local function runScript(useSave)
+    local SaveTitle = "KingGen HUB"
+    local saveData
+    local loadData
+    local savedKeyData
+    
+    if useSave then
+        SaveTitle = "KingGen HUB"
+        
+        if not isfolder(folderName) then
+            pcall(makefolder, folderName)
+        end
+
+        function saveData()
+            pcall(function()
+                writefile(keyFileName, HttpService:JSONEncode(config.Saved))
+            end)
+        end
+
+        function loadData()
+            if isfile(keyFileName) then
+                local success, content = pcall(readfile, keyFileName)
+                if success and content then
+                    local ok, data = pcall(HttpService.JSONDecode, HttpService, content)
+                    if ok and data then
+                        return data
+                    end
+                end
+            end
+            return nil
+        end
+        
+        savedKeyData = loadData()
+
+    else
+        SaveTitle = "KingGen HUB (No Save Supported)"
+        
+        function saveData()
+        end
+
+        function loadData()
+            return nil
+        end
+        
+        savedKeyData = nil
+    end
+
+    if savedKeyData and savedKeyData.key and useSave then
+        local savedKey = savedKeyData.key
+        local validKey = false
+
+        if savedKey == config.FreeKey or savedKey == config.SuperPermKey then
+            validKey = true
+        else
+            for _, v in ipairs(config.PermKeys) do
+              if v.key == savedKey and v.userid == UserId then
+                    validKey = true
+                    break
+                end
+            end
+        end
+
+        if validKey then
+            config.Saved = savedKeyData
+            local scriptCode = gameScripts[PlaceId]
+            if scriptCode then
+                local func, err = loadstring(scriptCode)
+                if func then
+                    func()
+                    return
+                end
+            end
+        end
+    end
+
+    local existingGui = game.CoreGui:FindFirstChild("KeySystemUI")
+    if existingGui then existingGui:Destroy() end
+    local existingKBtn = game.CoreGui:FindFirstChild("KeyButton")
+    if existingKBtn then existingKBtn:Destroy() end
+
+    -- FIX: DÃ©claration anticipÃ©e de createMainGui pour rÃ©soudre l'erreur de rÃ©fÃ©rence mutuelle
+    local createMainGui 
+
+    local function createKButton()
+        local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+        ScreenGui.Name = "KeyButton"
+        ScreenGui.ResetOnSpawn = false
+
+        local KButton = Instance.new("TextButton", ScreenGui)
+        KButton.Size = UDim2.new(0, 50, 0, 50)
+        KButton.Position = UDim2.new(0.05, 0, 0.05, 0)
+        KButton.BackgroundColor3 = Color3.fromRGB(47, 49, 54)
+        KButton.Text = "K"
+        KButton.TextColor3 = Color3.fromRGB(240, 71, 71)
+        KButton.Font = Enum.Font.GothamBold
+        KButton.TextScaled = true
+        KButton.ZIndex = 5
+        Instance.new("UICorner", KButton).CornerRadius = UDim.new(1, 0)
+
+        addShadow(KButton)
+
+        local dragging, dragInput, dragStart, startPos
+        local function update(input)
+            local delta = input.Position - dragStart
+            local newX = math.clamp(startPos.X.Offset + delta.X, 0, workspace.CurrentCamera.ViewportSize.X - KButton.AbsoluteSize.X)
+            local newY = math.clamp(startPos.Y.Offset + delta.Y, 0, workspace.CurrentCamera.ViewportSize.Y - KButton.AbsoluteSize.Y)
+            KButton.Position = UDim2.new(0, newX, 0, newY)
+        end
+
+        KButton.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = KButton.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+
+        KButton.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                update(input)
+            end
+        end)
+
+        -- FIX: Appelle createMainGui qui est maintenant dÃ©clarÃ©
+        KButton.MouseButton1Click:Connect(function()
+            ScreenGui:Destroy()
+            if createMainGui then 
+                createMainGui()
+            end
+        end)
+    end
+    
+    createMainGui = function() -- DÃ©finition complÃ¨te de createMainGui
+        local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+        ScreenGui.Name = "KeySystemUI"
+        ScreenGui.ResetOnSpawn = false
+
+        local Frame = Instance.new("Frame", ScreenGui)
+        Frame.Size = UDim2.new(0, 400, 0, 300)
+        Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+        Frame.BackgroundColor3 = Color3.fromRGB(54, 57, 63)
+        Frame.BorderSizePixel = 0
+        Frame.ZIndex = 2
+        Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 14)
+        addShadow(Frame)
+
+        local TitleHolder = Instance.new("Frame", Frame)
+        TitleHolder.Size = UDim2.new(1, 0, 0, 46)
+        TitleHolder.Position = UDim2.new(0, 0, 0, 0)
+        TitleHolder.BackgroundColor3 = Color3.fromRGB(47, 49, 54)
+        TitleHolder.BorderSizePixel = 0
+        TitleHolder.ZIndex = 3
+        Instance.new("UICorner", TitleHolder).CornerRadius = UDim.new(0, 14)
+
+        
+        local Title = Instance.new("TextLabel", TitleHolder)
+        Title.Size = UDim2.new(1, -80, 1, 0)
+        Title.Position = UDim2.new(0, 20, 0, 0)
+        Title.Text = SaveTitle 
+        Title.TextColor3 = Color3.fromRGB(233, 236, 239)
+        Title.BackgroundTransparency = 1
+        Title.TextScaled = true
+        Title.Font = Enum.Font.GothamSemibold
+        Title.ZIndex = 4
+
+       
+        local Close = Instance.new("TextButton", TitleHolder)
+        Close.Size = UDim2.new(0, 30, 0, 30)
+        Close.Position = UDim2.new(1, -34, 0, 8)
+        Close.Text = "X"
+        Close.TextColor3 = Color3.fromRGB(220, 53, 69)
+        Close.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
+        Close.ZIndex = 4
+        Instance.new("UICorner", Close).CornerRadius = UDim.new(0, 12)
+        Close.Font = Enum.Font.GothamBold
+        Close.TextScaled = true
+        Close.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+        local ReduceBtn = Instance.new("TextButton", TitleHolder)
+        ReduceBtn.Size = UDim2.new(0, 30, 0, 30)
+        ReduceBtn.Position = UDim2.new(1, -70, 0, 8)
+        ReduceBtn.Text = "-"
+        ReduceBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        ReduceBtn.BackgroundColor3 = Color3.fromRGB(240, 71, 71)
+        ReduceBtn.ZIndex = 4
+        Instance.new("UICorner", ReduceBtn).CornerRadius = UDim.new(0, 12)
+        ReduceBtn.Font = Enum.Font.GothamBold
+        ReduceBtn.TextScaled = true
+        ReduceBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy(); createKButton() end)
+
+        local KeyBox = Instance.new("TextBox", Frame)
+        KeyBox.PlaceholderText = "Enter your key"
+        KeyBox.PlaceholderColor3 = Color3.fromRGB(152, 159, 165)
+        KeyBox.Size = UDim2.new(0.85, 0, 0, 38)
+        KeyBox.Position = UDim2.new(0.075, 0, 0.25, 0)
+        KeyBox.Font = Enum.Font.Gotham
+        KeyBox.TextSize = 16
+        KeyBox.Text = ""
+        KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+        KeyBox.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
+        KeyBox.ClearTextOnFocus = false
+        KeyBox.ZIndex = 3
+        Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 8)
+
+        local SubmitBtn = Instance.new("TextButton", Frame)
+        SubmitBtn.Text = "Validate"
+        SubmitBtn.Size = UDim2.new(0.7, 0, 0, 36)
+        SubmitBtn.Position = UDim2.new(0.15, 0, 0.42, 0)
+        SubmitBtn.Font = Enum.Font.GothamBold
+        SubmitBtn.TextSize = 16
+        SubmitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        SubmitBtn.BackgroundColor3 = Color3.fromRGB(240, 71, 71)
+        SubmitBtn.ZIndex = 3
+        Instance.new("UICorner", SubmitBtn).CornerRadius = UDim.new(0, 8)
+
+        local Status = Instance.new("TextLabel", Frame)
+        Status.Text = ""
+        Status.Size = UDim2.new(1, -24, 0, 32)
+        Status.Position = UDim2.new(0, 12, 0.72, 0)
+        Status.TextColor3 = Color3.fromRGB(233, 236, 239)
+        Status.TextScaled = true
+        Status.BackgroundTransparency = 1
+        Status.Font = Enum.Font.Gotham
+        Status.ZIndex = 3
+
+        local InfoText = Instance.new("TextLabel", Frame)
+        InfoText.Text = "(If the correct key or script doesnâ€™t work, your executor is not supported)"
+        InfoText.Size = UDim2.new(1, -24, 0, 28)
+        InfoText.Position = UDim2.new(0, 12, 0.85, 0)
+        InfoText.TextColor3 = Color3.fromRGB(180, 180, 180)
+        InfoText.TextScaled = true
+        InfoText.BackgroundTransparency = 1
+        InfoText.Font = Enum.Font.Gotham
+        InfoText.ZIndex = 3
+
+        local DiscordBox = Instance.new("TextBox", Frame)
+        DiscordBox.Text = "https://discord.gg/RhDnUQr4Du"
+        DiscordBox.Size = UDim2.new(0.55, 0, 0, 30)
+        DiscordBox.Position = UDim2.new(0.11, 0, 0.60, 0)
+        DiscordBox.TextColor3 = Color3.fromRGB(102, 123, 160)
+        DiscordBox.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
+        DiscordBox.ClearTextOnFocus = false
+        DiscordBox.Font = Enum.Font.Gotham
+        DiscordBox.TextSize = 14
+        DiscordBox.ZIndex = 3
+        Instance.new("UICorner", DiscordBox).CornerRadius = UDim.new(0, 8)
+
+        local CopyBtn = Instance.new("TextButton", Frame)
+        CopyBtn.Text = "Copy"
+        CopyBtn.Size = UDim2.new(0.18, 0, 0, 30)
+        CopyBtn.Position = UDim2.new(0.69, 0, 0.60, 0)
+        CopyBtn.Font = Enum.Font.Gotham
+        CopyBtn.TextSize = 16
+        CopyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        CopyBtn.BackgroundColor3 = Color3.fromRGB(240, 71, 71)
+        CopyBtn.ZIndex = 3
+        Instance.new("UICorner", CopyBtn).CornerRadius = UDim.new(0, 8)
+        CopyBtn.MouseButton1Click:Connect(function()
+            setclipboard("https://discord.gg/RhDnUQr4Du")
+            Status.Text = "Discord link copied!"
+        end)
+
+        local dragging, dragInput, dragStart, startPos
+        local function update(input)
+            local delta = input.Position - dragStart
+            Frame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+        TitleHolder.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = Frame.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+        TitleHolder.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                update(input)
+            end
+        end)
+
+        SubmitBtn.MouseButton1Click:Connect(function()
+            local input = (KeyBox.Text or ""):gsub("%s+", "") 
+            local valid = false
+            local statusMessage = ""
+
+            if input == config.FreeKey then
+                valid = true
+                statusMessage = "Free key accepted!"
+            elseif input == config.SuperPermKey then
+                valid = true
+                statusMessage = "Super key accepted!"
+            else
+                for _, v in ipairs(config.PermKeys) do
+                    if v.key == input then
+                        if not v.used then
+                            v.used = true
+                            v.userid = UserId
+                            statusMessage = useSave and "Autoload: Contact owner for claim." or "Key accepted! (Not saved)"
+                            valid = true
+                        elseif v.userid == UserId then
+                            statusMessage = "Key already linked to you!"
+                            valid = true
+                        else
+                            statusMessage = "Key already used by another user."
+                        end
+                        break
+                    end
+                end
+            end
+            
+            Status.Text = statusMessage
+
+            if valid then
+                config.Saved = {key = input}
+                saveData()
+                ScreenGui:Destroy()
+                local scriptCode = gameScripts[PlaceId]
+                if scriptCode and scriptCode ~= "" then
+                    local func, err = loadstring(scriptCode)
+                    if func then
+                        func()
+                    else
+                        Player:Kick("Error loading game script: "..err)
+                    end
+                else
+                    Player:Kick("This game is not supported.")
+                end
+            else
+                Status.Text = "Invalid key!"
+            end
+        end)
+    end
+
+    createMainGui()
+end
+-- [Fin de la Fonction Principale FusionnÃ©e]
+
+-- [DÃ©clencheur d'exÃ©cution]
+local isFileSupport = pcall(function()
+    makefolder("TestFolderKeyhub")
+    writefile("TestFolderKeyhub/test.txt", "1")
+    local content = readfile("TestFolderKeyhub/test.txt")
+    return content == "1" and isfolder("TestFolderKeyhub") and isfile("TestFolderKeyhub/test.txt")
+end)
+
+-- ExÃ©cute la version appropriÃ©e
+runScript(isFileSupport)
+
+-- [Queue on Teleport Handler]
+if queueteleport then
+    local function runScriptNoSaveTeleport()
+        local function addShadow(parent)
+            local shadow = Instance.new("ImageLabel", parent)
+            shadow.Name = "Shadow"
+            shadow.Image = "rbxassetid://1316045217"
+            shadow.Size = UDim2.new(1, 12, 1, 12)
+            shadow.Position = UDim2.new(0, -6, 0, -6)
+            shadow.BackgroundTransparency = 1
+            shadow.ImageTransparency = 0.7
+            shadow.ZIndex = parent.ZIndex - 1
+            return shadow
+        end
+        local Player = Players.LocalPlayer
+        local UserId = Player.UserId
+        local PlaceId = game.PlaceId
+        local config = {
+            FreeKey = "CLONEFIX",
+            PermKeys = {
+                {key = "PERxxxM1", used = false, userid = nil},
+                {key = "PExxxRM2", used = false, userid = nil},
+                {key = "PERwwM3", used = false, userid = nil},
+                {key = "PEsssRM4", used = false, userid = nil},
+                {key = "PExxRM5", used = false, userid = nil},
+            },
+            SuperPermKey = "SUPERxxPERM",
+            Saved = {}
+        }
+        local gameScripts = {
+            [16656664443] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+            [15666650878] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+            [79243087103999] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+            [4543855070] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+            [76944637102068] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+            [12997619803] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+            [118396261129211] = fetchScript("https://raw.githubusercontent.com/sst31576-spec/ASDSDASSADSA/refs/heads/main/SADSADSAD"),
+            [94282122066477] = fetchScript("https://pastebin.com/raw/x8JTfbKZ"),
+            [18642553859] = fetchScript("https://pastebin.com/raw/99cDESLz")
+        }
+
+        local existingGui = game.CoreGui:FindFirstChild("KeySystemUI")
+        if existingGui then existingGui:Destroy() end
+        local existingKBtn = game.CoreGui:FindFirstChild("KeyButton")
+        if existingKBtn then existingKBtn:Destroy() end
+
+        -- FIX: DÃ©claration anticipÃ©e de createMainGui
+        local createMainGui 
+
+        local function createKButton()
+            local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+            ScreenGui.Name = "KeyButton"
+            ScreenGui.ResetOnSpawn = false
+
+            local KButton = Instance.new("TextButton", ScreenGui)
+            KButton.Size = UDim2.new(0, 50, 0, 50)
+            KButton.Position = UDim2.new(0.05, 0, 0.05, 0)
+            KButton.BackgroundColor3 = Color3.fromRGB(47, 49, 54)
+            KButton.Text = "K"
+            KButton.TextColor3 = Color3.fromRGB(240, 71, 71)
+            KButton.Font = Enum.Font.GothamBold
+            KButton.TextScaled = true
+            KButton.ZIndex = 5
+            Instance.new("UICorner", KButton).CornerRadius = UDim.new(1, 0)
+            addShadow(KButton)
+
+            local dragging, dragInput, dragStart, startPos
+            local function update(input)
+                local delta = input.Position - dragStart
+                local newX = math.clamp(startPos.X.Offset + delta.X, 0, workspace.CurrentCamera.ViewportSize.X - KButton.AbsoluteSize.X)
+                local newY = math.clamp(startPos.Y.Offset + delta.Y, 0, workspace.CurrentCamera.ViewportSize.Y - KButton.AbsoluteSize.Y)
+                KButton.Position = UDim2.new(0, newX, 0, newY)
+            end
+
+            KButton.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    dragStart = input.Position
+                    startPos = KButton.Position
+                    input.Changed:Connect(function()
+                        if input.UserInputState == Enum.UserInputState.End then
+                            dragging = false
+                        end
+                    end)
+                end
+            end)
+
+            KButton.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                    dragInput = input
+                end
+            end)
+
+            UserInputService.InputChanged:Connect(function(input)
+                if input == dragInput and dragging then
+                    update(input)
+                end
+            end)
+
+            KButton.MouseButton1Click:Connect(function()
+                ScreenGui:Destroy()
+                if createMainGui then
+                    createMainGui()
+                end
+            end)
+        end
+        
+        createMainGui = function()
+            local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+            ScreenGui.Name = "KeySystemUI"
+            ScreenGui.ResetOnSpawn = false
+
+            local Frame = Instance.new("Frame", ScreenGui)
+            Frame.Size = UDim2.new(0, 400, 0, 300)
+            Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+            Frame.BackgroundColor3 = Color3.fromRGB(54, 57, 63)
+            Frame.BorderSizePixel = 0
+            Frame.ZIndex = 2
+            Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 14)
+            addShadow(Frame)
+
+            local TitleHolder = Instance.new("Frame", Frame)
+            TitleHolder.Size = UDim2.new(1, 0, 0, 46)
+            TitleHolder.Position = UDim2.new(0, 0, 0, 0)
+            TitleHolder.BackgroundColor3 = Color3.fromRGB(47, 49, 54)
+            TitleHolder.BorderSizePixel = 0
+            TitleHolder.ZIndex = 3
+            Instance.new("UICorner", TitleHolder).CornerRadius = UDim.new(0, 14)
+
+            local Title = Instance.new("TextLabel", TitleHolder)
+            Title.Size = UDim2.new(1, -80, 1, 0)
+            Title.Position = UDim2.new(0, 20, 0, 0)
+            Title.Text = "KingGen HUB (No Save Supported)"
+            Title.TextColor3 = Color3.fromRGB(233, 236, 239)
+            Title.BackgroundTransparency = 1
+            Title.TextScaled = true
+            Title.Font = Enum.Font.GothamSemibold
+            Title.ZIndex = 4
+
+            local Close = Instance.new("TextButton", TitleHolder)
+            Close.Size = UDim2.new(0, 30, 0, 30)
+            Close.Position = UDim2.new(1, -34, 0, 8)
+            Close.Text = "âœ•"
+            Close.TextColor3 = Color3.fromRGB(220, 53, 69)
+            Close.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
+            Close.ZIndex = 4
+            Instance.new("UICorner", Close).CornerRadius = UDim.new(0, 12)
+            Close.Font = Enum.Font.GothamBold
+            Close.TextScaled = true
+            Close.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+            local ReduceBtn = Instance.new("TextButton", TitleHolder)
+            ReduceBtn.Size = UDim2.new(0, 30, 0, 30)
+            ReduceBtn.Position = UDim2.new(1, -70, 0, 8)
+            ReduceBtn.Text = "âˆ’"
+            ReduceBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            ReduceBtn.BackgroundColor3 = Color3.fromRGB(240, 71, 71)
+            ReduceBtn.ZIndex = 4
+            Instance.new("UICorner", ReduceBtn).CornerRadius = UDim.new(0, 12)
+            ReduceBtn.Font = Enum.Font.GothamBold
+            ReduceBtn.TextScaled = true
+            ReduceBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy(); createKButton() end)
+
+            local KeyBox = Instance.new("TextBox", Frame)
+            KeyBox.PlaceholderText = "Enter your key"
+            KeyBox.PlaceholderColor3 = Color3.fromRGB(152, 159, 165)
+            KeyBox.Size = UDim2.new(0.85, 0, 0, 38)
+            KeyBox.Position = UDim2.new(0.075, 0, 0.25, 0)
+            KeyBox.Font = Enum.Font.Gotham
+            KeyBox.TextSize = 16
+            KeyBox.Text = ""
+            KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+            KeyBox.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
+            KeyBox.ClearTextOnFocus = false
+            KeyBox.ZIndex = 3
+            Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 8)
+
+            local SubmitBtn = Instance.new("TextButton", Frame)
+            SubmitBtn.Text = "Validate"
+            SubmitBtn.Size = UDim2.new(0.7, 0, 0, 36)
+            SubmitBtn.Position = UDim2.new(0.15, 0, 0.42, 0)
+            SubmitBtn.Font = Enum.Font.GothamBold
+            SubmitBtn.TextSize = 16
+            SubmitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            SubmitBtn.BackgroundColor3 = Color3.fromRGB(240, 71, 71)
+            SubmitBtn.ZIndex = 3
+            Instance.new("UICorner", SubmitBtn).CornerRadius = UDim.new(0, 8)
+
+            local Status = Instance.new("TextLabel", Frame)
+            Status.Text = ""
+            Status.Size = UDim2.new(1, -24, 0, 32)
+            Status.Position = UDim2.new(0, 12, 0.72, 0)
+            Status.TextColor3 = Color3.fromRGB(233, 236, 239)
+            Status.TextScaled = true
+            Status.BackgroundTransparency = 1
+            Status.Font = Enum.Font.Gotham
+            Status.ZIndex = 3
+
+            local InfoText = Instance.new("TextLabel", Frame)
+            InfoText.Text = "(If the correct key or script doesn't work, your executor is not supported)"
+            InfoText.Size = UDim2.new(1, -24, 0, 28)
+            InfoText.Position = UDim2.new(0, 12, 0.85, 0)
+            InfoText.TextColor3 = Color3.fromRGB(180, 180, 180)
+            InfoText.TextScaled = true
+            InfoText.BackgroundTransparency = 1
+            InfoText.Font = Enum.Font.Gotham
+            InfoText.ZIndex = 3
+
+            local DiscordBox = Instance.new("TextBox", Frame)
+            DiscordBox.Text = "https://discord.gg/RhDnUQr4Du"
+            DiscordBox.Size = UDim2.new(0.55, 0, 0, 30)
+            DiscordBox.Position = UDim2.new(0.11, 0, 0.60, 0)
+            DiscordBox.TextColor3 = Color3.fromRGB(102, 123, 160)
+            DiscordBox.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
+            DiscordBox.ClearTextOnFocus = false
+            DiscordBox.Font = Enum.Font.Gotham
+            DiscordBox.TextSize = 14
+            DiscordBox.ZIndex = 3
+            Instance.new("UICorner", DiscordBox).CornerRadius = UDim.new(0, 8)
+
+            local CopyBtn = Instance.new("TextButton", Frame)
+            CopyBtn.Text = "ðŸ“‹"
+            CopyBtn.Size = UDim2.new(0.18, 0, 0, 30)
+            CopyBtn.Position = UDim2.new(0.69, 0, 0.60, 0)
+            CopyBtn.Font = Enum.Font.Gotham
+            CopyBtn.TextSize = 16
+            CopyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            CopyBtn.BackgroundColor3 = Color3.fromRGB(240, 71, 71)
+            CopyBtn.ZIndex = 3
+            Instance.new("UICorner", CopyBtn).CornerRadius = UDim.new(0, 8)
+            CopyBtn.MouseButton1Click:Connect(function()
+                setclipboard("https://discord.gg/RhDnUQr4Du")
+                Status.Text = "Discord link copied!"
+            end)
+
+            local dragging, dragInput, dragStart, startPos
+            local function update(input)
+                local delta = input.Position - dragStart
+                Frame.Position = UDim2.new(
+                    startPos.X.Scale,
+                    startPos.X.Offset + delta.X,
+                    startPos.Y.Scale,
+                    startPos.Y.Offset + delta.Y
+                )
+            end
+            TitleHolder.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    dragStart = input.Position
+                    startPos = Frame.Position
+                    input.Changed:Connect(function()
+                        if input.UserInputState == Enum.UserInputState.End then
+                            dragging = false
+                        end
+                    end)
+                end
+            end)
+            TitleHolder.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                    dragInput = input
+                end
+            end)
+            UserInputService.InputChanged:Connect(function(input)
+                if input == dragInput and dragging then
+                    update(input)
+                end
+            end)
+
+            SubmitBtn.MouseButton1Click:Connect(function()
+                local input = (KeyBox.Text or ""):gsub("%s+", "") 
+                local valid = false
+
+                if input == config.FreeKey then
+                    valid = true
+                    Status.Text = "Free key accepted!"
+                elseif input == config.SuperPermKey then
+                    valid = true
+                    Status.Text = "Super key accepted!"
+                else
+                    for _, v in ipairs(config.PermKeys) do
+                        if v.key == input then
+                            if not v.used then
+                                v.used = true
+                                v.userid = UserId
+                                Status.Text = "Key accepted! (Not saved)"
+                                valid = true
+                            elseif v.userid == UserId then
+                                Status.Text = "Key already linked to you!"
+                                valid = true
+                            else
+                                Status.Text = "Key already used by another user."
+                            end
+                            break
+                        end
+                    end
+                end
+
+                if valid then
+                    ScreenGui:Destroy()
+                    local scriptCode = gameScripts[PlaceId]
+                    if scriptCode and scriptCode ~= "" then
+                        local func, err = loadstring(scriptCode)
+                        if func then
+                            func()
+                        else
+                            Player:Kick("Error loading game script: "..err)
+                        end
+                    else
+                        Player:Kick("This game is not supported.")
+                    end
+                else
+                    Status.Text = "Invalid key!"
+                end
+            end)
+        end
+        
+        createMainGui()
+
+    end
+    queueteleport(runScriptNoSaveTeleport)
+end]]
+-- Sauvegarde du script complet
+pcall(function()
+    if not isfolder(folderName) then makefolder(folderName) end
+    writefile(scriptFileName, fullScript)
+end)
+
+-- Queue_on_teleport en string (compatible avec ton executor)
+pcall(function()
+    if queueteleport then
+        queueteleport([[
+                        task.wait(5)
+            loadstring(readfile("https://pastebin.com/raw/GuRzEb6F"))()
+        ]])
+    end
+end)
+
+-- ExÃ©cution immÃ©diate au premier run
+loadstring(fullScript)()
