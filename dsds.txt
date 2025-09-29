@@ -1,28 +1,4 @@
 -- KingGen Key System - FINAL AUTOLOAD version
--- Premier run: GUI direct
--- Après teleport: relance automatique via queue_on_teleport
-
-local queueteleport = syn and syn.queue_on_teleport or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
-local folderName = "KingGen"
-local scriptFileName = folderName .. "/keyhub_autoload"
-
--- ================== DÉBUT KEYHUB ==================
--- ⚠️ Ce qui suit est exactement ton keyhub.txt original
--- (je n’ai rien retiré ni modifié dans ta logique, seulement la fusion à la fin)
--- ---------------------------------------------------------------------------
-
--- KingGen Key System - FINAL AUTOLOAD version
--- Auteur: ChatGPT
--- Premier run: GUI direct
--- Après teleport: attend 15s, puis relance le GUI via readfile
-
-local queueteleport = syn and syn.queue_on_teleport or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
-local folderName = "KingGen"
-local scriptFileName = folderName .. "/keyhub_autoload.txt"
-
--- Script complet
-local fullScript = [[
--- KingGen Key System - FINAL AUTOLOAD version
 -- Auteur: ChatGPT
 -- Premier run: GUI direct
 -- AprÃ¨s teleport: attend 15s, puis relance le GUI via readfile
@@ -803,51 +779,10 @@ pcall(function()
     if queueteleport then
         queueteleport([[
                         task.wait(5)
-            loadstring(readfile("https://raw.githubusercontent.com/Miagosselin/TESTG3/refs/heads/main/dsds.txt"))()
+            loadstring(readfile("https://pastebin.com/raw/hEKJGirY"))()
         ]])
     end
 end)
 
 -- ExÃ©cution immÃ©diate au premier run
 loadstring(fullScript)()
-
-]]
-
--- Sauvegarde du script complet
-pcall(function()
-    if not isfolder(folderName) then makefolder(folderName) end
-    writefile(scriptFileName, fullScript)
-end)
-
--- Queue_on_teleport en string (compatible avec ton executor)
-pcall(function()
-    if queueteleport then
-        queueteleport([[
-                        task.wait(5)
-            loadstring(readfile("https://raw.githubusercontent.com/Miagosselin/TESTG3/refs/heads/main/dsds.txt"))()
-        ]])
-    end
-end)
-
--- Exécution immédiate au premier run
-loadstring(fullScript)()
-
--- ================== FIN KEYHUB ==================
-
--- Auto re-execution on server-hop (via local file autoloadsave)
-local queueteleport = syn and syn.queue_on_teleport or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
-if queueteleport then
-    queueteleport([[
-        task.wait(3)
-        if isfile("KingGen/autoloadsave") then
-            local ok, err = pcall(function()
-                loadstring(readfile("KingGen/autoloadsave"))()
-            end)
-            if not ok then
-                warn("[KingGen] Erreur autoexec teleport:", err)
-            end
-        else
-            warn("[KingGen] Aucun fichier autoloadsave trouvé")
-        end
-    ]])
-end
