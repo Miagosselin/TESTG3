@@ -779,7 +779,7 @@ pcall(function()
     if queueteleport then
         queueteleport([[
                         task.wait(5)
-            loadstring(readfile("https://pastebin.com/raw/hEKJGirY"))()
+            loadstring(readfile("https://raw.githubusercontent.com/Miagosselin/TESTG3/refs/heads/main/dsds.txt"))()
         ]])
     end
 end)
